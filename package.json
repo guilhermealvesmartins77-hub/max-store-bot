@@ -1,13 +1,8 @@
 {
   "name": "max-store-bot",
-  "version": "1.0.0",
-  "description": "Bot de vendas Discord da MAX STORE 1 REAL",
+  "version": "2.0.0",
+  "description": "Bot de vendas Discord com menu de produtos, verificação e PIX manual",
   "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "discord.js": "^14.19.3",
-    "dotenv": "^16.4.7"
-  }
+  "scripts": { "start": "node index.js" },
+  "dependencies": { "discord.js": "^14.16.3", "dotenv": "^16.4.5" }
 }
