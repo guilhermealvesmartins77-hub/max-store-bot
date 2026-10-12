@@ -2,7 +2,7 @@
   "name": "max-store-discord-bot",
   "version": "1.0.0",
   "description": "Bot de vendas Discord com verificação, PIX Mercado Pago, SQLite e registros de vendas",
-  "main": "src/index.js",
+  "main": "index.js",
   "scripts": { "start": "node src/index.js" },
   "engines": { "node": ">=20" },
   "dependencies": {
