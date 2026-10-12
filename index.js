@@ -75,10 +75,16 @@ client.on(Events.InteractionCreate,async i=>{
   if(i.isChatInputCommand()){
     if(['painel','configurar_verificacao','configurar_canal_vendas','produto_adicionar','venda_confirmar'].includes(i.commandName) && !isAdmin(i)) return i.reply({content:'Somente administradores podem usar este comando.',ephemeral:true});
     if(i.commandName==='configurar_canal_vendas') return i.reply({content:`ID deste canal: \`${i.channelId}\`. Configure SALES_CHANNEL_ID na FadeHost e reinicie o bot.`,ephemeral:true});
-    if(i.commandName==='configurar_verificacao'){
-      settings.verifyChannelId=i.channelId; writeJson(SETTINGS_FILE,settings);
-      return i.reply({content:'Painel de verificação publicado neste canal.',ephemeral:true, ...verifyPanel()});
-    }
+if(i.commandName==='configurar_verificacao'){
+  settings.verifyChannelId=i.channelId;
+  writeJson(SETTINGS_FILE,settings);
+  await i.channel.send(verifyPanel());
+  return i.reply({
+    content:'✅ Painel de verificação publicado para todos neste canal!',
+    ephemeral:true
+  });
+}
+    
     if(i.commandName==='produto_adicionar'){
       const name=i.options.getString('nome',true).trim(); const price=i.options.getNumber('preco',true); const description=i.options.getString('descricao',true); const delivery=i.options.getString('entrega',true);
       const p={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,cents:Math.round(price*100),description,delivery,stock:'Disponível',active:true}; products.push(p); writeJson(PRODUCTS_FILE,products);
