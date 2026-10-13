@@ -33,23 +33,26 @@ let orders = readJson(ORDERS_FILE,[]);
 let settings = readJson(SETTINGS_FILE,{});
 const money = cents => (cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const isAdmin = i => !!i.memberPermissions?.has(PermissionFlagsBits.Administrator);
-const commands = [ 
-  new SlashCommandBuilder().setName('painel').setDescription('Publica/atualiza o painel de produtos da loja.'),
-  new SlashCommandBuilder().setName('configurar_verificacao').setDescription('Publica o botão de verificação obrigatória.'),
-  new SlashCommandBuilder().setName('configurar_canal_vendas').setDescription('Mostra o ID deste canal para configurar o canal de vendas.'),
-  new SlashCommandBuilder().setName('produto_adicionar').setDescription('Adiciona produto à loja.')
-    .addStringOption(o=>o.setName('nome').setDescription('Nome do produto').setRequired(true))
-    .addNumberOption(o=>o.setName('preco').setDescription('Preço em reais, exemplo 1.00').setRequired(true).setMinValue(0.01))
-    .addStringOption(o=>o.setName('descricao').setDescription('Descrição do produto').setRequired(true))
-    .addStringOption(o=>o.setName('entrega').setDescription('Conteúdo/instruções entregues após confirmação').setRequired(true)),
-  new SlashCommandBuilder().setName('produto_listar').setDescription('Lista os produtos cadastrados.'),
-  new SlashCommandBuilder().setName('venda_confirmar').setDescription('Confirma um PIX após verificar o recebimento no banco.')
-    .addStringOption(o=>o.setName('pedido').setDescription('ID do pedido informado ao comprador').setRequired(true))
+const commands = [
+  new SlashCommandBuilder().setName('painel').setDescription('Publica o painel de vendas'),
+  new SlashCommandBuilder().setName('configurar_verificacao').setDescription('Configura a verificação'),
+  new SlashCommandBuilder().setName('configurar_canal_vendas').setDescription('Configura o canal de vendas'),
   new SlashCommandBuilder()
-  .setName('produto_remover')
-  .setDescription('Escolha um produto para remover'),
-].map(c=>c.toJSON());
-const rest = new REST({version:'10'}).setToken(TOKEN);
+    .setName('produto_adicionar')
+    .setDescription('Adiciona produto ao canal')
+    .addStringOption(o => o.setName('nome').setDescription('Nome do produto').setRequired(true))
+    .addNumberOption(o => o.setName('preco').setDescription('Preço em reais').setRequired(true))
+    .addStringOption(o => o.setName('descricao').setDescription('Descrição do produto').setRequired(true))
+    .addStringOption(o => o.setName('entrega').setDescription('Conteúdo entregue').setRequired(true)),
+  new SlashCommandBuilder().setName('produto_listar').setDescription('Lista os produtos do canal'),
+  new SlashCommandBuilder()
+    .setName('venda_confirmar')
+    .setDescription('Confirma um PIX após pagamento')
+    .addStringOption(o => o.setName('pedido').setDescription('ID do pedido').setRequired(true)),
+  new SlashCommandBuilder()
+    .setName('produto_remover')
+    .setDescription('Escolha um produto para remover')
+].map(c => c.toJSON());
 const client = new Client({intents:[GatewayIntentBits.Guilds,GatewayIntentBits.GuildMembers]});
 function productPanel(channelId){
   const embed = new EmbedBuilder()
