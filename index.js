@@ -12,6 +12,7 @@ const TOKEN = env('DISCORD_TOKEN');
 const CLIENT_ID = env('DISCORD_CLIENT_ID','CLIENT_ID');
 const GUILD_ID = env('DISCORD_GUILD_ID','GUILD_ID');
 const SALES_CHANNEL_ID = process.env.SALES_CHANNEL_ID;
+const DELIVERY_LOG_CHANNEL_ID = '1558901094451515553';
 const PIX_KEY = process.env.PIX_KEY;
 const PIX_NAME = process.env.PIX_NAME || 'Recebedor';
 const STORE_NAME = process.env.STORE_NAME || 'MAX STORE 1 REAL';
@@ -184,7 +185,7 @@ return i.reply({content:lista.length?lista.map(p=>`• **${p.name}** — ${money
       order.status='pago'; order.confirmedBy=i.user.id; order.confirmedAt=new Date().toISOString(); writeJson(ORDERS_FILE,orders);
       const buyer=await client.users.fetch(order.userId).catch(()=>null);
       if(buyer) await buyer.send(`✅ Pagamento confirmado para o pedido ${order.id} — ${order.productName}.\nEntrega/instruções: ${order.delivery}`).catch(()=>{});
-      const ch=await client.channels.fetch(SALES_CHANNEL_ID).catch(()=>null);
+      const ch=await client.channels.fetch(DELIVERY_LOG_CHANNEL_ID).catch(()=>null);
       if(ch?.isTextBased()) await ch.send({embeds:[new EmbedBuilder().setTitle('✅ Venda confirmada').setColor(0x22c55e).addFields({name:'Produto',value:order.productName,inline:true},{name:'Valor',value:money(order.cents),inline:true},{name:'Comprador',value:`<@${order.userId}>`,inline:true},{name:'Pedido',value:order.id}).setTimestamp()]});
       return i.reply({content:`Pedido ${order.id} marcado como pago. A entrega foi enviada por mensagem privada se o comprador aceitar DMs.`,ephemeral:true});
     }
