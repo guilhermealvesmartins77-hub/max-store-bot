@@ -33,7 +33,7 @@ let orders = readJson(ORDERS_FILE,[]);
 let settings = readJson(SETTINGS_FILE,{});
 const money = cents => (cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const isAdmin = i => !!i.memberPermissions?.has(PermissionFlagsBits.Administrator);
-const commands = [
+const commands = [ 
   new SlashCommandBuilder().setName('painel').setDescription('Publica/atualiza o painel de produtos da loja.'),
   new SlashCommandBuilder().setName('configurar_verificacao').setDescription('Publica o botão de verificação obrigatória.'),
   new SlashCommandBuilder().setName('configurar_canal_vendas').setDescription('Mostra o ID deste canal para configurar o canal de vendas.'),
@@ -45,6 +45,9 @@ const commands = [
   new SlashCommandBuilder().setName('produto_listar').setDescription('Lista os produtos cadastrados.'),
   new SlashCommandBuilder().setName('venda_confirmar').setDescription('Confirma um PIX após verificar o recebimento no banco.')
     .addStringOption(o=>o.setName('pedido').setDescription('ID do pedido informado ao comprador').setRequired(true))
+  new SlashCommandBuilder()
+  .setName('produto_remover')
+  .setDescription('Escolha um produto para remover'),
 ].map(c=>c.toJSON());
 const rest = new REST({version:'10'}).setToken(TOKEN);
 const client = new Client({intents:[GatewayIntentBits.Guilds,GatewayIntentBits.GuildMembers]});
@@ -134,6 +137,35 @@ if(i.commandName==='configurar_verificacao'){
     ephemeral:true
   });
     }
+   if (i.commandName === 'produto_remover') {
+  const lista = products.filter(
+    p => p.channelId === i.channelId && p.active !== false
+  );
+
+  if (!lista.length) {
+    return i.reply({
+      content: '❌ Não há produtos neste canal para remover.',
+      ephemeral: true
+    });
+  }
+
+  const menu = new StringSelectMenuBuilder()
+    .setCustomId('remover_produto')
+    .setPlaceholder('🗑️ Escolha o produto que deseja remover')
+    .addOptions(lista.slice(0, 25).map(p => ({
+      label: p.name.slice(0, 100),
+      description: `Preço: ${money(p.cents)}`.slice(0, 100),
+      value: p.id
+    })));
+
+     const row = new ActionRowBuilder().addComponents(menu);
+
+    return i.reply({
+      content: '🗑️ Escolha o produto que deseja remover deste canal:',
+      components: [row],
+      ephemeral: true
+    });
+      }
     if(i.commandName==='produto_listar'){
 const lista=products.filter(p=>p.channelId===i.channelId);
 return i.reply({content:lista.length?lista.map(p=>`• **${p.name}** — ${money(p.cents)} — ID \`${p.id}\``).join('\n'):'Nenhum produto cadastrado neste canal.',ephemeral:true});
@@ -169,7 +201,28 @@ if(i.isStringSelectMenu() && i.customId.startsWith('select_product_')){
   if(!p) return i.reply({content:'Produto não encontrado. Peça ao administrador para atualizar o painel.',ephemeral:true});
   return sendOrder(i,p);
 }
-  
+ if (i.isStringSelectMenu() && i.customId === 'remover_produto') {
+  const produto = products.find(
+    p => p.id === i.values[0] && p.channelId === i.channelId
+  );
+
+  if (!produto) {
+    return i.reply({
+      content: '❌ Produto não encontrado neste canal.',
+      ephemeral: true
+    });
+  }
+
+  products = products.filter(
+  p => !(p.id === produto.id && p.channelId === i.channelId)
+);
+  writeJson(PRODUCTS_FILE, products);
+
+  return i.update({
+    content: `✅ Produto **${produto.name}** removido deste canal!`,
+    components: []
+  });
+ } 
  
   } catch(e) {
   console.error(e);
