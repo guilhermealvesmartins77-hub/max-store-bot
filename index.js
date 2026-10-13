@@ -111,13 +111,37 @@ return i.reply({content:lista.length?lista.map(p=>`• **${p.name}** — ${money
     }
   }
   if(i.isButton() && i.customId==='verify_member'){
-    const verified=settings.verifiedUsers || []; if(!verified.includes(i.user.id)){verified.push(i.user.id);settings.verifiedUsers=verified;writeJson(SETTINGS_FILE,settings);}
-    return i.reply({content:'✅ Verificação concluída! Agora você pode voltar ao painel e escolher seu produto.',ephemeral:true});
+  const verified=settings.verifiedUsers || [];
+  if(!verified.includes(i.user.id)){
+    verified.push(i.user.id);
+    settings.verifiedUsers=verified;
+    writeJson(SETTINGS_FILE,settings);
   }
-  if(i.isStringSelectMenu() && i.customId==='select_product'){
-    const p=products.find(x=>x.id===i.values[0] && x.active!==false); if(!p) return i.reply({content:'Produto não encontrado. Peça ao administrador para atualizar o painel.',ephemeral:true});
-    return sendOrder(i,p);
+  return i.reply({content:'✅ Verificação concluída! Agora você pode voltar ao painel e escolher seu produto.',ephemeral:true});
+}
+
+if(i.isStringSelectMenu() && i.customId.startsWith('select_product_')){
+  const p=products.find(x=>x.id===i.values[0] && x.active!==false && x.channelId===i.channelId);
+  if(!p) return i.reply({content:'Produto não encontrado. Peça ao administrador para atualizar o painel.',ephemeral:true});
+  return sendOrder(i,p);
+}
+  
+ 
+  } catch(e) {
+  console.error(e);
+  if(i.isRepliable()&&!i.replied&&!i.deferred){
+   await i.reply({content:'Ocorreu um erro. Confira os logs da hospedagem.',ephemeral:true}).catch(()=>{});
   }
- }catch(e){console.error(e);if(i.isRepliable()&&!i.replied&&!i.deferred) await i.reply({content:'Ocorreu um erro. Confira os logs da hospedagem.',ephemeral:true}).catch(()=>{});}
+ }
 });
-(async()=>{try{await rest.put(Routes.applicationGuildCommands(CLIENT_ID,GUILD_ID),{body:commands});console.log('Comandos do servidor registrados.');await client.login(TOKEN);}catch(e){console.error('Falha ao iniciar:',e);process.exit(1);}})();
+
+(async()=>{
+ try{
+  await rest.put(Routes.applicationGuildCommands(CLIENT_ID,GUILD_ID),{body:commands});
+  console.log('Comandos do servidor registrados.');
+  await client.login(TOKEN);
+ }catch(e){
+  console.error('Falha ao iniciar:',e);
+  process.exit(1);
+ }
+})();
