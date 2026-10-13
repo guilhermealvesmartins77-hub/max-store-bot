@@ -50,8 +50,13 @@ const rest = new REST({version:'10'}).setToken(TOKEN);
 const client = new Client({intents:[GatewayIntentBits.Guilds,GatewayIntentBits.GuildMembers]});
 function productPanel(channelId){
   const embed = new EmbedBuilder()
-    .setTitle(`🛍️ ${STORE_NAME}`)
-    .setDescription('Escolha um produto abaixo.')
+    .setTitle(`🎁 ${STORE_NAME}`)
+    .setDescription(
+        'Escolha um produto no menu abaixo para iniciar seu pedido.\n\n' +
+        '🔐 É necessário verificar sua conta antes de comprar.\n' +
+        '💳 Pagamento via PIX; um administrador confirma após conferir o recebimento.\n\n' +
+        `${STORE_NAME} • Atendimento e segurança`
+    )
     .setColor(0x7c3aed);
 
   const available = products.filter(
