@@ -48,9 +48,9 @@ const commands = [
 ].map(c=>c.toJSON());
 const rest = new REST({version:'10'}).setToken(TOKEN);
 const client = new Client({intents:[GatewayIntentBits.Guilds,GatewayIntentBits.GuildMembers]});
-function productPanel(){
+function productPanel(channelId){
   const embed = new EmbedBuilder().setTitle(`🛍️ ${STORE_NAME}`).setDescription('Escolha um produto no menu abaixo para iniciar seu pedido.\n\n🔐 É necessário verificar sua conta antes de comprar.\n💳 Pagamento via PIX; um administrador confirma após conferir o recebimento.').setColor(0x7c3aed).setFooter({text:'MAX STORE • Atendimento e segurança'});
-  const available = products.filter(p=>p.active !== false).slice(0,25);
+  const available = products.filter(p=>p.active !== false && p.channelId === channelId).slice(0,25);
   const rows=[];
   if(available.length){
     const menu = new StringSelectMenuBuilder().setCustomId('select_product').setPlaceholder('➡️ Clique aqui para escolher um produto').setMinValues(1).setMaxValues(1).addOptions(available.map(p=>({label:p.name.slice(0,100),description:`Preço: ${money(p.cents)} | Estoque: ${p.stock ?? 'Disponível'}`.slice(0,100),value:p.id})));
@@ -87,13 +87,16 @@ if(i.commandName==='configurar_verificacao'){
     
     if(i.commandName==='produto_adicionar'){
       const name=i.options.getString('nome',true).trim(); const price=i.options.getNumber('preco',true); const description=i.options.getString('descricao',true); const delivery=i.options.getString('entrega',true);
-      const p={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,cents:Math.round(price*100),description,delivery,stock:'Disponível',active:true}; products.push(p); writeJson(PRODUCTS_FILE,products);
+      const p={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,cents:Math.round(price*100),description,delivery,stock:'Disponível',active:true,channelId:i.channelId};
       return i.reply({content:`Produto **${name}** adicionado por ${money(p.cents)}. Use /painel para publicar/atualizar o menu de produtos.`,ephemeral:true});
     }
-    if(i.commandName==='produto_listar') return i.reply({content:products.length?products.map(p=>`• **${p.name}** — ${money(p.cents)} — ID \`${p.id}\``).join('\n'):'Nenhum produto cadastrado.',ephemeral:true});
+    if(i.commandName==='produto_listar'){
+const lista=products.filter(p=>p.channelId===i.channelId);
+return i.reply({content:lista.length?lista.map(p=>`• **${p.name}** — ${money(p.cents)} — ID \`${p.id}\``).join('\n'):'Nenhum produto cadastrado neste canal.',ephemeral:true});
+    } 
     if(i.commandName==='painel'){
       if(!products.length) return i.reply({content:'Cadastre primeiro um produto usando /produto_adicionar.',ephemeral:true});
-      await i.channel.send(productPanel()); return i.reply({content:'Painel de produtos publicado.',ephemeral:true});
+      await i.channel.send(productPanel(i.channelId)); return i.reply({content:'Painel de produtos publicado.',ephemeral:true});
     }
     if(i.commandName==='venda_confirmar'){
       const id=i.options.getString('pedido',true).trim(); const order=orders.find(o=>o.id===id);
