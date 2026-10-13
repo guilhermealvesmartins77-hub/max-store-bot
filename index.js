@@ -105,9 +105,29 @@ if(i.commandName==='configurar_verificacao'){
 }
     
     if(i.commandName==='produto_adicionar'){
-      const name=i.options.getString('nome',true).trim(); const price=i.options.getNumber('preco',true); const description=i.options.getString('descricao',true); const delivery=i.options.getString('entrega',true);
-      const p={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,cents:Math.round(price*100),description,delivery,stock:'Disponível',active:true,channelId:i.channelId};
-      return i.reply({content:`Produto **${name}** adicionado por ${money(p.cents)}. Use /painel para publicar/atualizar o menu de produtos.`,ephemeral:true});
+  const name=i.options.getString('nome',true).trim();
+  const price=i.options.getNumber('preco',true);
+  const description=i.options.getString('descricao',true);
+  const delivery=i.options.getString('entrega',true);
+
+  const p={
+    id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    name,
+    cents:Math.round(price*100),
+    description,
+    delivery,
+    stock:'Disponível',
+    active:true,
+    channelId:i.channelId
+  };
+
+  products.push(p);
+  writeJson(PRODUCTS_FILE,products);
+
+  return i.reply({
+    content:`Produto **${name}** adicionado por ${money(p.cents)}. Use /painel para publicar/atualizar o menu de produtos.`,
+    ephemeral:true
+  });
     }
     if(i.commandName==='produto_listar'){
 const lista=products.filter(p=>p.channelId===i.channelId);
