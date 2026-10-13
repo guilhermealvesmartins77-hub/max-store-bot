@@ -49,14 +49,33 @@ const commands = [
 const rest = new REST({version:'10'}).setToken(TOKEN);
 const client = new Client({intents:[GatewayIntentBits.Guilds,GatewayIntentBits.GuildMembers]});
 function productPanel(channelId){
-  const embed = new EmbedBuilder().setTitle(`🛍️ ${STORE_NAME}`).setDescription('Escolha um produto no menu abaixo para iniciar seu pedido.\n\n🔐 É necessário verificar sua conta antes de comprar.\n💳 Pagamento via PIX; um administrador confirma após conferir o recebimento.').setColor(0x7c3aed).setFooter({text:'MAX STORE • Atendimento e segurança'});
-  const available = products.filter(p=>p.active !== false && p.channelId === channelId).slice(0,25);
-  const rows=[];
-  if(available.length){
-    const menu = new StringSelectMenuBuilder().setCustomId('select_product').setPlaceholder('➡️ Clique aqui para escolher um produto').setMinValues(1).setMaxValues(1).addOptions(available.map(p=>({label:p.name.slice(0,100),description:`Preço: ${money(p.cents)} | Estoque: ${p.stock ?? 'Disponível'}`.slice(0,100),value:p.id})));
+  const embed = new EmbedBuilder()
+    .setTitle(`🛍️ ${STORE_NAME}`)
+    .setDescription('Escolha um produto abaixo.')
+    .setColor(0x7c3aed);
+
+  const available = products.filter(
+    p => p.active !== false && p.channelId === channelId
+  );
+
+  const rows = [];
+
+  if (available.length) {
+    const menu = new StringSelectMenuBuilder()
+      .setCustomId(`select_product_${channelId}`)
+      .setPlaceholder('➡️ Clique aqui para escolher um produto')
+      .setMinValues(1)
+      .setMaxValues(1)
+      .addOptions(available.slice(0, 25).map(p => ({
+        label: p.name.slice(0, 100),
+        description: `Preço: ${money(p.cents)}`.slice(0, 100),
+        value: p.id
+      })));
+
     rows.push(new ActionRowBuilder().addComponents(menu));
   }
-  return {embeds:[embed],components:rows};
+
+  return { embeds: [embed], components: rows };
 }
 function verifyPanel(){
   return {embeds:[new EmbedBuilder().setTitle('🔐 Verificação obrigatória').setDescription('Clique no botão abaixo para concluir a verificação e liberar as compras.').setColor(0x22c55e)],components:[new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId('verify_member').setLabel('✅ Verificar-se').setStyle(ButtonStyle.Success))]};
@@ -95,7 +114,7 @@ const lista=products.filter(p=>p.channelId===i.channelId);
 return i.reply({content:lista.length?lista.map(p=>`• **${p.name}** — ${money(p.cents)} — ID \`${p.id}\``).join('\n'):'Nenhum produto cadastrado neste canal.',ephemeral:true});
     } 
     if(i.commandName==='painel'){
-      if(!products.length) return i.reply({content:'Cadastre primeiro um produto usando /produto_adicionar.',ephemeral:true});
+      if(!products.some(p=>p.channelId===i.channelId && p.active!==false)) return i.reply({content:'Cadastre primeiro um produto neste canal usando /produto_adicionar.',ephemeral:true});
       await i.channel.send(productPanel(i.channelId)); return i.reply({content:'Painel de produtos publicado.',ephemeral:true});
     }
     if(i.commandName==='venda_confirmar'){
