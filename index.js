@@ -237,7 +237,8 @@ if(i.isStringSelectMenu() && i.customId.startsWith('select_product_')){
 
 (async()=>{
  try{
-  await rest.put(Routes.applicationGuildCommands(CLIENT_ID,GUILD_ID),{body:commands});
+  const rest = new REST({ version: '10' }).setToken(TOKEN);
+await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), { body: commands });
   console.log('Comandos do servidor registrados.');
   await client.login(TOKEN);
  }catch(e){
