@@ -259,7 +259,16 @@ return i.reply({content:lista.length?lista.map(p=>`• **${p.name}** — ${money
       if(order.status==='pago') return i.reply({content:'Este pedido já foi confirmado.',ephemeral:true});
       order.status='pago'; order.confirmedBy=i.user.id; order.confirmedAt=new Date().toISOString(); writeJson(ORDERS_FILE,orders);
       const buyer=await client.users.fetch(order.userId).catch(()=>null);
-      if(buyer) await buyer.send(`✅ Pagamento confirmado para o pedido ${order.id} — ${order.productName}.\nEntrega/instruções: ${order.delivery}`).catch(()=>{});
+      const produto = products.find(p => p.id === order.productId);
+
+if (buyer && produto) {
+  await buyer.send(
+    `✅ Pagamento confirmado!\n\n` +
+    `🛒 Produto: ${produto.name}\n` +
+    `📦 Sua entrega:\n${produto.delivery}`
+  ).catch(() => {});
+}
+      
       const ch=await client.channels.fetch(DELIVERY_LOG_CHANNEL_ID).catch(()=>null);
       if(ch?.isTextBased()) await ch.send({embeds:[new EmbedBuilder().setTitle('✅ Venda confirmada').setColor(0x22c55e).addFields({name:'Produto',value:order.productName,inline:true},{name:'Valor',value:money(order.cents),inline:true},{name:'Comprador',value:`<@${order.userId}>`,inline:true},{name:'Pedido',value:order.id}).setTimestamp()]});
       const ticket = await client.channels.fetch(order.channelId).catch(() => null);
