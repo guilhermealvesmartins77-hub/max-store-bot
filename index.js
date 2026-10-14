@@ -92,13 +92,88 @@ function productPanel(channelId){
 function verifyPanel(){
   return {embeds:[new EmbedBuilder().setTitle('🔐 Verificação obrigatória').setDescription('Clique no botão abaixo para concluir a verificação e liberar as compras.').setColor(0x22c55e)],components:[new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId('verify_member').setLabel('✅ Verificar-se').setStyle(ButtonStyle.Success))]};
 }
-async function sendOrder(interaction,p){
+async function sendOrder(interaction, p) {
   const verified = settings.verifiedUsers || [];
-  if(!verified.includes(interaction.user.id)) return interaction.reply({content:'Você precisa concluir a verificação antes de comprar. Use o botão Verificar-se no canal de verificação.',ephemeral:true});
-  const order={id:`MS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2,5).toUpperCase()}`,userId:interaction.user.id,productId:p.id,productName:p.name,cents:p.cents,delivery:p.delivery,status:'aguardando_pagamento',createdAt:new Date().toISOString()};
-  orders.push(order); writeJson(ORDERS_FILE,orders);
-  const embed=new EmbedBuilder().setTitle('🧾 Pedido criado').setColor(0xf59e0b).setDescription(`**Produto:** ${p.name}\n**Descrição:** ${p.description}\n**Valor:** ${money(p.cents)}\n**Pedido:** \`${order.id}\`\n\n**PIX (chave):** \`${PIX_KEY}\`\n**Recebedor:** ${PIX_NAME}\n\nApós pagar, aguarde um administrador confirmar. A entrega só ocorre depois da conferência do pagamento. Não envie senha ou dados bancários.`);
-  return interaction.reply({embeds:[embed],ephemeral:true});
+
+  if (!verified.includes(interaction.user.id)) {
+    return interaction.reply({
+      content: '🔒 Você precisa verificar sua conta antes de comprar.',
+      ephemeral: true
+    });
+  }
+
+  await interaction.deferReply({ ephemeral: true });
+
+  const nomeTicket = `🛒-${p.name}`
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9-]/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 90);
+
+  const ticket = await interaction.guild.channels.create({
+    name: nomeTicket,
+    type: 0,
+    parent: interaction.channel.parentId || undefined,
+    permissionOverwrites: [
+      {
+        id: interaction.guild.id,
+        deny: ['ViewChannel']
+      },
+      {
+        id: interaction.user.id,
+        allow: ['ViewChannel', 'SendMessages', 'ReadMessageHistory', 'AttachFiles']
+      },
+      {
+        id: client.user.id,
+        allow: ['ViewChannel', 'SendMessages', 'ReadMessageHistory', 'ManageChannels']
+      }
+    ]
+  }).catch(() => null);
+
+  if (!ticket) {
+    return interaction.editReply({
+      content: '❌ Não consegui criar o ticket. Verifique as permissões do bot.'
+    });
+  }
+
+  const order = {
+    id: `MS-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`,
+    userId: interaction.user.id,
+    productId: p.id,
+    productName: p.name,
+    price: p.price,
+    cents: p.cents,
+    channelId: ticket.id,
+    status: 'pendente',
+    createdAt: new Date().toISOString()
+  };
+
+  orders.push(order);
+  writeJson(ORDERS_FILE, orders);
+
+  const embed = new EmbedBuilder()
+    .setTitle(`🛒 ${p.name}`)
+    .setColor(0x2ecc71)
+    .setDescription(
+      `Olá, ${interaction.user}!\n\n` +
+      `📦 **Produto:** ${p.name}\n` +
+      `💰 **Valor:** ${money(p.cents)}\n\n` +
+      `💠 **Chave Pix:**\n\`${PIX_KEY}\`\n\n` +
+      `📸 Após pagar, envie o comprovante aqui no ticket.\n` +
+      `⏳ Aguarde a confirmação de um administrador.\n\n` +
+      `🧾 **Pedido:** ${order.id}`
+    );
+
+  await ticket.send({
+    content: `${interaction.user}`,
+    embeds: [embed]
+  });
+
+  return interaction.editReply({
+    content: `✅ Seu ticket foi criado: ${ticket}`
+  });
 }
 client.once(Events.ClientReady, c=>console.log(`Bot conectado como ${c.user.tag}`));
 client.on(Events.InteractionCreate,async i=>{
