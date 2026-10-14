@@ -179,7 +179,42 @@ async function sendOrder(interaction, p) {
 client.once(Events.ClientReady, c=>console.log(`Bot conectado como ${c.user.tag}`));
 client.on(Events.InteractionCreate,async i=>{
  try{
-  if(i.isChatInputCommand()){
+ if (i.isStringSelectMenu() && i.customId === 'support_ticket_type') {
+  const tipo = i.values[0];
+
+  const canal = await i.guild.channels.create({
+    name: `${tipo}-${i.user.username}`.toLowerCase(),
+    type: 0,
+    permissionOverwrites: [
+      {
+        id: i.guild.id,
+        deny: ['ViewChannel']
+      },
+      {
+        id: i.user.id,
+        allow: ['ViewChannel', 'SendMessages', 'ReadMessageHistory']
+      },
+      {
+        id: i.client.user.id,
+        allow: ['ViewChannel', 'SendMessages', 'ReadMessageHistory', 'ManageChannels']
+      },
+      {
+  id: '1558900769707524207',
+  allow: ['ViewChannel', 'SendMessages', 'ReadMessageHistory']
+      }
+    ]
+  });
+
+  await canal.send({
+    content: `🎫 Atendimento de **${tipo}**\nCliente: ${i.user}\nDescreva seu problema aqui.`
+  });
+
+  return i.reply({
+    content: `✅ Seu ticket foi criado: ${canal}`,
+    ephemeral: true
+  });
+ }
+   if(i.isChatInputCommand()){
     if(['painel','configurar_verificacao','configurar_canal_vendas','produto_adicionar','venda_confirmar'].includes(i.commandName) && !isAdmin(i)) return i.reply({content:'Somente administradores podem usar este comando.',ephemeral:true});
     if(i.commandName==='configurar_canal_vendas') return i.reply({content:`ID deste canal: \`${i.channelId}\`. Configure SALES_CHANNEL_ID na FadeHost e reinicie o bot.`,ephemeral:true});
 if(i.commandName==='configurar_verificacao'){
@@ -250,6 +285,37 @@ if(i.commandName==='configurar_verificacao'){
 const lista=products.filter(p=>p.channelId===i.channelId);
 return i.reply({content:lista.length?lista.map(p=>`• **${p.name}** — ${money(p.cents)} — ID \`${p.id}\``).join('\n'):'Nenhum produto cadastrado neste canal.',ephemeral:true});
     } 
+    if(i.commandName==='painel_suporte'){
+  const embed = new EmbedBuilder()
+    .setTitle('💜 MAX STORE | CENTRAL DE ATENDIMENTO')
+    .setDescription(
+      '✨ Precisando de ajuda? Escolha uma opção abaixo!\n\n' +
+      '🛒 **Suporte:** problemas com compras ou entregas.\n' +
+      '❓ **Dúvida:** perguntas sobre a loja.\n' +
+      '💸 **Reembolso:** solicitação para análise.\n\n' +
+      '🔒 Seu atendimento será privado.'
+    )
+    .setColor(0x7c3aed);
+
+  const menu = new StringSelectMenuBuilder()
+    .setCustomId('support_ticket_type')
+    .setPlaceholder('🎫 Escolha o atendimento')
+    .addOptions(
+      { label: 'Suporte', value: 'suporte', emoji: '🛒' },
+      { label: 'Dúvida', value: 'duvida', emoji: '❓' },
+      { label: 'Reembolso', value: 'reembolso', emoji: '💸' }
+    );
+
+  await i.channel.send({
+    embeds: [embed],
+    components: [new ActionRowBuilder().addComponents(menu)]
+  });
+
+  return i.reply({
+    content: '✅ Painel de suporte publicado!',
+    ephemeral: true
+  });
+    }
     if(i.commandName==='painel'){
       if(!products.some(p=>p.channelId===i.channelId && p.active!==false)) return i.reply({content:'Cadastre primeiro um produto neste canal usando /produto_adicionar.',ephemeral:true});
       await i.channel.send(productPanel(i.channelId)); return i.reply({content:'Painel de produtos publicado.',ephemeral:true});
