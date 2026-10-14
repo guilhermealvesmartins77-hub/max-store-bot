@@ -64,7 +64,8 @@ function productPanel(channelId){
         '💳 Pagamento via PIX; um administrador confirma após conferir o recebimento.\n\n' +
         `${STORE_NAME} • Atendimento e segurança`
     )
-    .setColor(0x7c3aed);
+.setColor(0x7c3aed)
+.setImage('https://i.imgur.com/onrs9RT.png');
 
   const available = products.filter(
     p => p.active !== false && p.channelId === channelId
