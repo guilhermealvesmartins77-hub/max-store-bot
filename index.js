@@ -262,7 +262,19 @@ return i.reply({content:lista.length?lista.map(p=>`• **${p.name}** — ${money
       if(buyer) await buyer.send(`✅ Pagamento confirmado para o pedido ${order.id} — ${order.productName}.\nEntrega/instruções: ${order.delivery}`).catch(()=>{});
       const ch=await client.channels.fetch(DELIVERY_LOG_CHANNEL_ID).catch(()=>null);
       if(ch?.isTextBased()) await ch.send({embeds:[new EmbedBuilder().setTitle('✅ Venda confirmada').setColor(0x22c55e).addFields({name:'Produto',value:order.productName,inline:true},{name:'Valor',value:money(order.cents),inline:true},{name:'Comprador',value:`<@${order.userId}>`,inline:true},{name:'Pedido',value:order.id}).setTimestamp()]});
-      return i.reply({content:`Pedido ${order.id} marcado como pago. A entrega foi enviada por mensagem privada se o comprador aceitar DMs.`,ephemeral:true});
+      const ticket = await client.channels.fetch(order.channelId).catch(() => null);
+
+if (ticket && ticket.isTextBased()) {
+  await ticket.send('✅ Pagamento confirmado! Este ticket será fechado em 5 segundos.');
+  setTimeout(() => {
+    ticket.delete().catch(() => {});
+  }, 5000);
+}
+
+return i.reply({
+  content: `✅ Pedido ${order.id} confirmado! O ticket será fechado automaticamente.`,
+  ephemeral: true
+});
     }
   }
   if(i.isButton() && i.customId==='verify_member'){
