@@ -207,9 +207,19 @@ client.on(Events.InteractionCreate,async i=>{
     ]
   });
 
-  await canal.send({
-    content: `🎫 Atendimento de **${tipo}**\nCliente: ${i.user}\nDescreva seu problema aqui.`
-  });
+  const fechar = new ButtonBuilder()
+    .setCustomId('fechar_ticket')
+    .setLabel('Fechar ticket')
+    .setEmoji('🔒')
+    .setStyle(ButtonStyle.Danger);
+
+const botoes = new ActionRowBuilder()
+    .addComponents(fechar);
+
+await canal.send({
+    content: `🎫 Atendimento de **${tipo}**\nCliente: ${i.user}\nDescreva seu problema aqui.`,
+    components: [botoes]
+});
 
   return i.reply({
     content: `✅ Seu ticket foi criado: ${canal}`,
@@ -355,7 +365,23 @@ return i.reply({
 });
     }
   }
-  if(i.isButton() && i.customId==='verify_member'){
+ if (i.isButton() && i.customId === 'fechar_ticket') {
+    if (!i.memberPermissions.has(PermissionFlagsBits.ManageChannels)) {
+        return i.reply({
+            content: '❌ Você não tem permissão para fechar este ticket.',
+            ephemeral: true
+        });
+    }
+
+    await i.reply('🔒 Este ticket será fechado em 5 segundos.');
+
+    setTimeout(() => {
+        i.channel.delete().catch(() => {});
+    }, 5000);
+
+    return;
+ }
+   if(i.isButton() && i.customId==='verify_member'){
   const verified=settings.verifiedUsers || [];
   if(!verified.includes(i.user.id)){
     verified.push(i.user.id);
