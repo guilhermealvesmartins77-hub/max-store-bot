@@ -34,7 +34,9 @@ let orders = readJson(ORDERS_FILE,[]);
 let settings = readJson(SETTINGS_FILE,{});
 const money = cents => (cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const isAdmin = i => !!i.memberPermissions?.has(PermissionFlagsBits.Administrator);
-const commands = [
+const commands = [new SlashCommandBuilder()
+  .setName('painel_suporte')
+  .setDescription('Publica o painel de suporte'),
   new SlashCommandBuilder().setName('painel').setDescription('Publica o painel de vendas'),
   new SlashCommandBuilder().setName('configurar_verificacao').setDescription('Configura a verificação'),
   new SlashCommandBuilder().setName('configurar_canal_vendas').setDescription('Configura o canal de vendas'),
