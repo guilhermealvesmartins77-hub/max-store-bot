@@ -53,10 +53,41 @@ const commands = [new SlashCommandBuilder()
     .setDescription('Confirma um PIX após pagamento')
     .addStringOption(o => o.setName('pedido').setDescription('ID do pedido').setRequired(true)),
   new SlashCommandBuilder()
-    .setName('produto_remover')
-    .setDescription('Escolha um produto para remover')
-].map(c => c.toJSON());
-const client = new Client({intents:[GatewayIntentBits.Guilds,GatewayIntentBits.GuildMembers]});
+  .setName('produto_remover')
+  .setDescription('Escolha um produto para remover'),
+
+new SlashCommandBuilder()
+  .setName('estoque')
+  .setDescription('Consultar estoque dos produtos'),
+
+new SlashCommandBuilder()
+  .setName('estoque_adicionar')
+  .setDescription('Adicionar unidades ao estoque')
+  .addStringOption(o =>
+    o.setName('produto')
+      .setDescription('Nome do produto')
+      .setRequired(true))
+  .addIntegerOption(o =>
+    o.setName('quantidade')
+      .setDescription('Quantidade para adicionar')
+      .setMinValue(1)
+      .setRequired(true)),
+
+new SlashCommandBuilder()
+  .setName('estoque_remover')
+  .setDescription('Remover unidades do estoque')
+  .addStringOption(o =>
+    o.setName('produto')
+      .setDescription('Nome do produto')
+      .setRequired(true))
+  .addIntegerOption(o =>
+    o.setName('quantidade')
+      .setDescription('Quantidade para remover')
+      .setMinValue(1)
+      .setRequired(true)),
+  ].map(c => c.toJSON());
+
+                  const client = new Client({intents:[GatewayIntentBits.Guilds,GatewayIntentBits.GuildMembers]});
 function productPanel(channelId){
   const embed = new EmbedBuilder()
     .setTitle(`🎁 ${STORE_NAME}`)
