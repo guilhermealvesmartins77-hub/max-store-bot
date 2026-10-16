@@ -114,7 +114,7 @@ function productPanel(channelId){
       .setMaxValues(1)
       .addOptions(available.slice(0, 25).map(p => ({
         label: p.name.slice(0, 100),
-        description: `Preço: ${money(p.cents)}`.slice(0, 100),
+        description: `Preço: ${money(p.cents)} | Estoque: ${Number(p.quantity) || 0}`.slice(0, 100),
         value: p.id
       })));
 
