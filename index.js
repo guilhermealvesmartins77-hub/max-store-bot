@@ -328,7 +328,71 @@ if(i.commandName==='configurar_verificacao'){
 const lista=products.filter(p=>p.channelId===i.channelId);
 return i.reply({content:lista.length?lista.map(p=>`• **${p.name}** — ${money(p.cents)} — ID \`${p.id}\``).join('\n'):'Nenhum produto cadastrado neste canal.',ephemeral:true});
     } 
-    if(i.commandName==='painel_suporte'){
+    if (i.commandName === 'estoque') {
+  const lista = products.filter(
+    p => p.channelId === i.channelId && p.active !== false
+  );
+
+  const texto = lista.length
+    ? lista.map(p =>
+        `📦 **${p.name}** — ${Number(p.quantity) || 0} unidades`
+      ).join('\n')
+    : '❌ Nenhum produto cadastrado neste canal.';
+
+  return i.reply({
+    content: `📦 **ESTOQUE — MAX STORE**\n\n${texto}`,
+    ephemeral: true
+  });
+}
+
+if (
+  i.commandName === 'estoque_adicionar' ||
+  i.commandName === 'estoque_remover'
+) {
+  const nome = i.options.getString('produto', true).trim();
+  const quantidade = i.options.getInteger('quantidade', true);
+
+  const produto = products.find(
+    p => p.channelId === i.channelId &&
+         p.active !== false &&
+         p.name.toLowerCase() === nome.toLowerCase()
+  );
+
+  if (!produto) {
+    return i.reply({
+      content: '❌ Produto não encontrado neste canal. Confira o nome.',
+      ephemeral: true
+    });
+  }
+
+  const atual = Number(produto.quantity) || 0;
+
+  if (
+    i.commandName === 'estoque_remover' &&
+    quantidade > atual
+  ) {
+    return i.reply({
+      content: `❌ Estoque insuficiente. Quantidade atual: ${atual}.`,
+      ephemeral: true
+    });
+  }
+
+  produto.quantity =
+    i.commandName === 'estoque_adicionar'
+      ? atual + quantidade
+      : atual - quantidade;
+
+  writeJson(PRODUCTS_FILE, products);
+
+  return i.reply({
+    content:
+      `✅ Estoque atualizado!\n` +
+      `📦 Produto: **${produto.name}**\n` +
+      `🔢 Quantidade disponível: **${produto.quantity}**`,
+    ephemeral: true
+  });
+}
+     if(i.commandName==='painel_suporte'){
   const embed = new EmbedBuilder()
     .setTitle('💜 MAX STORE | CENTRAL DE ATENDIMENTO')
     .setDescription(
