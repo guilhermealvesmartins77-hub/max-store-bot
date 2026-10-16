@@ -258,7 +258,7 @@ await canal.send({
   });
  }
    if(i.isChatInputCommand()){
-    if(['painel','configurar_verificacao','configurar_canal_vendas','produto_adicionar','venda_confirmar'].includes(i.commandName) && !isAdmin(i)) return i.reply({content:'Somente administradores podem usar este comando.',ephemeral:true});
+    if(!['painel','configurar_verificacao','configurar_canal_vendas','produto_adicionar','venda_confirmar','estoque','estoque_adicionar','estoque_remover'].includes(i.commandName) && !isAdmin(i)) return i.reply({content:'Somente administradores podem usar este comando.',ephemeral:true});
     if(i.commandName==='configurar_canal_vendas') return i.reply({content:`ID deste canal: \`${i.channelId}\`. Configure SALES_CHANNEL_ID na FadeHost e reinicie o bot.`,ephemeral:true});
 if(i.commandName==='configurar_verificacao'){
   settings.verifyChannelId=i.channelId;
