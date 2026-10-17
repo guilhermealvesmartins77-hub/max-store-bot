@@ -87,7 +87,14 @@ new SlashCommandBuilder()
       .setRequired(true)),
   ].map(c => c.toJSON());
 
-                  const client = new Client({intents:[GatewayIntentBits.Guilds,GatewayIntentBits.GuildMembers]});
+                  const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
+  ]
+});
 function productPanel(channelId){
   const embed = new EmbedBuilder()
     .setTitle(`🎁 ${STORE_NAME}`)
