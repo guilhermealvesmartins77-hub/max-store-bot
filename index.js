@@ -195,26 +195,50 @@ async function sendOrder(interaction, p) {
   writeJson(ORDERS_FILE, orders);
 
   const embed = new EmbedBuilder()
-    .setTitle(`🛒 ${p.name}`)
-    .setColor(0x2ecc71)
-    .setDescription(
-      `Olá, ${interaction.user}!\n\n` +
-      `📦 **Produto:** ${p.name}\n` +
-      `💰 **Valor:** ${money(p.cents)}\n\n` +
-      `💠 **Chave Pix:**\n\`${PIX_KEY}\`\n\n` +
-      `📸 Após pagar, envie o comprovante aqui no ticket.\n` +
-      `⏳ Aguarde a confirmação de um administrador.\n\n` +
-      `🧾 **Pedido:** ${order.id}`
-    );
+  .setTitle(`🛒 ${p.name}`)
+  .setColor(0x2ec71)
+  .setDescription(
+    `Olá, ${interaction.user}!\n\n` +
+    `📦 **Produto:** ${p.name}\n` +
+    `💰 **Valor:** ${money(p.cents)}\n` +
+    `🔑 **Chave Pix:**\n\`${PIX_KEY}\`\n\n` +
+    `📩 Após pagar, envie o comprovante neste ticket.\n` +
+    `⏳ Aguarde a confirmação de um administrador.\n\n` +
+    `🧾 **Pedido:** ${order.id}`
+  )
+  .setImage('https://i.imgur.com/onrs9RT.png');
+const botoesPagamento = new ActionRowBuilder().addComponents(
+  new ButtonBuilder()
+    .setCustomId(`pagar_${order.id}`)
+    .setLabel('Ir para o Pagamento')
+    .setEmoji('✅')
+    .setStyle(ButtonStyle.Success),
 
-  await ticket.send({
-    content: `${interaction.user}`,
-    embeds: [embed]
-  });
+  new ButtonBuilder()
+    .setCustomId(`editar_${order.id}`)
+    .setLabel('Editar Quantidade')
+    .setEmoji('🖊️')
+    .setStyle(ButtonStyle.Primary),
 
-  return interaction.editReply({
-    content: `✅ Seu ticket foi criado: ${ticket}`
-  });
+  new ButtonBuilder()
+    .setCustomId(`cupom_${order.id}`)
+    .setLabel('Usar Cupom')
+    .setEmoji('🎟️')
+    .setStyle(ButtonStyle.Secondary),
+
+  new ButtonBuilder()
+    .setCustomId(`cancelar_${order.id}`)
+    .setLabel('Cancelar')
+    .setEmoji('🗑️')
+    .setStyle(ButtonStyle.Danger)
+);
+
+await ticket.send({
+  content: `${interaction.user}`,
+  embeds: [embed],
+  components: [botoesPagamento]
+});
+  
 }
 client.once(Events.ClientReady, c=>console.log(`Bot conectado como ${c.user.tag}`));
 client.on(Events.InteractionCreate,async i=>{
