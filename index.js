@@ -529,6 +529,17 @@ if(i.isStringSelectMenu() && i.customId.startsWith('select_product_')){
  }
 });
 
+client.on(Events.MessageCreate, async (message) => {
+  if (message.author.bot) return;
+  if (message.channel.id !== '1558901090282504233') return;
+
+  try {
+    await message.react('⭐');
+    console.log('Reação adicionada!');
+  } catch (error) {
+    console.error('Erro ao reagir:', error);
+  }
+});
 (async()=>{
  try{
   const rest = new REST({ version: '10' }).setToken(TOKEN);
