@@ -4,7 +4,8 @@ const path = require('node:path');
 const {
   Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder,
   EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle,
-  StringSelectMenuBuilder, Events, PermissionFlagsBits
+  StringSelectMenuBuilder, ModalBuilder, TextInputBuilder,
+TextInputStyle, Events, PermissionFlagsBits
 } = require('discord.js');
 
 const env = (a,b) => process.env[a] || process.env[b];
