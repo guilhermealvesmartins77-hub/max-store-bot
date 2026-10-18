@@ -113,6 +113,15 @@ function productPanel(channelId){
   );
 
   const rows = [];
+  const botaoEstoque = new ActionRowBuilder().addComponents(
+  new ButtonBuilder()
+    .setCustomId('solicitar_estoque')
+    .setLabel('Solicitar Estoque')
+    .setEmoji('📦')
+    .setStyle(ButtonStyle.Success)
+);
+
+rows.push(botaoEstoque);
 
   if (available.length) {
     const menu = new StringSelectMenuBuilder()
