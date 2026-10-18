@@ -38,7 +38,7 @@ const isAdmin = i => !!i.memberPermissions?.has(PermissionFlagsBits.Administrato
 const commands = [new SlashCommandBuilder()
   .setName('painel_suporte')
   .setDescription('Publica o painel de suporte'),
-new SlashCommandBuilder().setName('painel_solicitar_estoque').setDescription('Publica o painel de vendas'),
+new SlashCommandBuilder().setName('painel_solicitar_estoque').setDescription('Publica o painel de solicitar estoque'),
   new SlashCommandBuilder().setName('configurar_verificacao').setDescription('Configura a verificação'),
   new SlashCommandBuilder().setName('configurar_canal_vendas').setDescription('Configura o canal de vendas'),
   new SlashCommandBuilder()
@@ -501,10 +501,28 @@ if (
     ephemeral: true
   });
     }
-    if(i.commandName==='painel_solicitar_estoque'){
-      if(!products.some(p=>p.channelId===i.channelId && p.active!==false)) return i.reply({content:'Cadastre primeiro um produto neste canal usando /produto_adicionar.',ephemeral:true});
-      await i.channel.send(productPanel(i.channelId)); return i.reply({content:'Painel de produtos publicado.',ephemeral:true});
-    }
+    if (i.commandName === 'painel_solicitar_estoque') {
+  const embed = new EmbedBuilder()
+    .setTitle('📦 Solicitar Estoque | MAX STORE')
+    .setDescription('Clique no botão abaixo para solicitar reposição de estoque.')
+    .setColor(0x7c3aed)
+    .setImage('https://i.imgur.com/onrs9RT.png');
+
+  const botao = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId('solicitar_estoque')
+      .setLabel('Solicitar Estoque')
+      .setEmoji('📦')
+      .setStyle(ButtonStyle.Success)
+  );
+
+  await i.channel.send({ embeds: [embed], components: [botao] });
+
+  return i.reply({
+    content: '✅ Painel de solicitar estoque publicado!',
+    ephemeral: true
+  });
+   }
     if(i.commandName==='venda_confirmar'){
       const id=i.options.getString('pedido',true).trim(); const order=orders.find(o=>o.id===id);
       if(!order) return i.reply({content:'Pedido não encontrado. Confira o ID exatamente como aparece no pedido.',ephemeral:true});
