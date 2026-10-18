@@ -290,6 +290,38 @@ client.on(Events.InteractionCreate,async i=>{
 
   return i.showModal(modal);
  }
+  if (i.isModalSubmit() && i.customId === 'formulario_solicitar_estoque') {
+  const nomeProduto = i.fields.getTextInputValue('nome_produto_estoque');
+  const quantidade = i.fields.getTextInputValue('quantidade_estoque');
+  const mensagem = i.fields.getTextInputValue('mensagem_adicional_estoque') || 'Nenhuma';
+
+  const canalEstoque = await i.guild.channels.fetch('1561435957771763732').catch(() => null);
+
+  if (!canalEstoque || !canalEstoque.isTextBased()) {
+    return i.reply({
+      content: '❌ Não consegui encontrar o canal de solicitações de estoque.',
+      ephemeral: true
+    });
+  }
+
+  const embedEstoque = new EmbedBuilder()
+    .setTitle('📦 Nova Solicitação de Estoque')
+    .setColor(0x7c3aed)
+    .addFields(
+      { name: '👤 Solicitante', value: `${i.user}`, inline: false },
+      { name: '📦 Produto', value: nomeProduto, inline: true },
+      { name: '🔢 Quantidade', value: quantidade, inline: true },
+      { name: '📝 Mensagem adicional', value: mensagem, inline: false }
+    )
+    .setTimestamp();
+
+  await canalEstoque.send({ embeds: [embedEstoque] });
+
+  return i.reply({
+    content: '✅ Sua solicitação de estoque foi enviada com sucesso!',
+    ephemeral: true
+  });
+  }
    if (i.isStringSelectMenu() && i.customId === 'support_ticket_type') {
   const tipo = i.values[0];
 
