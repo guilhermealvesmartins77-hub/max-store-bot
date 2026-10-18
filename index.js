@@ -253,7 +253,44 @@ await ticket.send({
 client.once(Events.ClientReady, c=>console.log(`Bot conectado como ${c.user.tag}`));
 client.on(Events.InteractionCreate,async i=>{
  try{
- if (i.isStringSelectMenu() && i.customId === 'support_ticket_type') {
+ if (i.isButton() && i.customId === 'solicitar_estoque') {
+  const modal = new ModalBuilder()
+    .setCustomId('formulario_solicitar_estoque')
+    .setTitle('Solicitar Estoque');
+
+  const nomeProduto = new TextInputBuilder()
+    .setCustomId('nome_produto_estoque')
+    .setLabel('Nome do Produto')
+    .setPlaceholder('Nome do produto que precisa de estoque')
+    .setStyle(TextInputStyle.Short)
+    .setRequired(true)
+    .setMaxLength(100);
+
+  const quantidade = new TextInputBuilder()
+    .setCustomId('quantidade_estoque')
+    .setLabel('Quantidade Desejada')
+    .setPlaceholder('Ex.: 1')
+    .setStyle(TextInputStyle.Short)
+    .setRequired(true)
+    .setMaxLength(5);
+
+  const mensagemAdicional = new TextInputBuilder()
+    .setCustomId('mensagem_adicional_estoque')
+    .setLabel('Mensagem Adicional')
+    .setPlaceholder('Informações adicionais sobre a solicitação...')
+    .setStyle(TextInputStyle.Paragraph)
+    .setRequired(false)
+    .setMaxLength(500);
+
+  modal.addComponents(
+    new ActionRowBuilder().addComponents(nomeProduto),
+    new ActionRowBuilder().addComponents(quantidade),
+    new ActionRowBuilder().addComponents(mensagemAdicional)
+  );
+
+  return i.showModal(modal);
+ }
+   if (i.isStringSelectMenu() && i.customId === 'support_ticket_type') {
   const tipo = i.values[0];
 
   const canal = await i.guild.channels.create({
