@@ -38,7 +38,7 @@ const isAdmin = i => !!i.memberPermissions?.has(PermissionFlagsBits.Administrato
 const commands = [new SlashCommandBuilder()
   .setName('painel_suporte')
   .setDescription('Publica o painel de suporte'),
-  new SlashCommandBuilder().setName('painel').setDescription('Publica o painel de vendas'),
+new SlashCommandBuilder().setName('painel_solicitar_estoque').setDescription('Publica o painel de vendas'),
   new SlashCommandBuilder().setName('configurar_verificacao').setDescription('Configura a verificação'),
   new SlashCommandBuilder().setName('configurar_canal_vendas').setDescription('Configura o canal de vendas'),
   new SlashCommandBuilder()
@@ -501,7 +501,7 @@ if (
     ephemeral: true
   });
     }
-    if(i.commandName==='painel'){
+    if(i.commandName==='painel_solicitar_estoque'){
       if(!products.some(p=>p.channelId===i.channelId && p.active!==false)) return i.reply({content:'Cadastre primeiro um produto neste canal usando /produto_adicionar.',ephemeral:true});
       await i.channel.send(productPanel(i.channelId)); return i.reply({content:'Painel de produtos publicado.',ephemeral:true});
     }
