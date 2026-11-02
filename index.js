@@ -39,6 +39,9 @@ const commands = [new SlashCommandBuilder()
   .setName('painel_suporte')
   .setDescription('Publica o painel de suporte'),
 new SlashCommandBuilder().setName('painel_solicitar_estoque').setDescription('Publica o painel de solicitar estoque'),
+                  new SlashCommandBuilder()
+.setName('painel_de_vendas')
+.setDescription('Publica o painel de vendas'),
   new SlashCommandBuilder().setName('configurar_verificacao').setDescription('Configura a verificação'),
   new SlashCommandBuilder().setName('configurar_canal_vendas').setDescription('Configura o canal de vendas'),
   new SlashCommandBuilder()
