@@ -23,7 +23,7 @@ if (!TOKEN || !CLIENT_ID || !GUILD_ID || !SALES_CHANNEL_ID || !PIX_KEY) {
   process.exit(1);
 }
 const DATA_DIR = path.join(__dirname, 'data');
-fs.mkdirSync(DATA_DIR,{recursive:true});
+fs.mkdirSync(DATA_DIR,{recursive:true});..
 const PRODUCTS_FILE = path.join(DATA_DIR,'products.json');
 const ORDERS_FILE = path.join(DATA_DIR,'orders.json');
 const SETTINGS_FILE = path.join(DATA_DIR,'settings.json');
