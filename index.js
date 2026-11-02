@@ -368,7 +368,7 @@ await canal.send({
   });
  }
    if(i.isChatInputCommand()){
-    if(!['painel','configurar_verificacao','configurar_canal_vendas','produto_adicionar','venda_confirmar','estoque','estoque_adicionar','estoque_remover'].includes(i.commandName) && !isAdmin(i)) return i.reply({content:'Somente administradores podem usar este comando.',ephemeral:true});
+    if(!['painel',''painel_de_vendas','configurar_verificacao','configurar_canal_vendas','produto_adicionar','venda_confirmar','estoque','estoque_adicionar','estoque_remover'].includes(i.commandName) && !isAdmin(i)) return i.reply({content:'Somente administradores podem usar este comando.',ephemeral:true});
     if(i.commandName==='configurar_canal_vendas') return i.reply({content:`ID deste canal: \`${i.channelId}\`. Configure SALES_CHANNEL_ID na FadeHost e reinicie o bot.`,ephemeral:true});
 if(i.commandName==='configurar_verificacao'){
   settings.verifyChannelId=i.channelId;
@@ -380,7 +380,14 @@ if(i.commandName==='configurar_verificacao'){
   });
 }
     
-    if(i.commandName==='produto_adicionar'){
+if (i.commandName === 'painel_de_vendas') {
+  await i.channel.send(productPanel(i.channelId));
+  return i.reply({
+    content: '✅ Painel de vendas publicado com sucesso!',
+    ephemeral: true
+  });
+}
+     if(i.commandName==='produto_adicionar'){
   const name=i.options.getString('nome',true).trim();
   const price=i.options.getNumber('preco',true);
   const description=i.options.getString('descricao',true);
